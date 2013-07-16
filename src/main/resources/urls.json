@@ -1,0 +1,47 @@
+[   
+    {
+        "label": "My Stuff",
+        "expect": {
+            "faster_than_millis": 2000,
+            "status_code": 200
+        },
+        "urls": [
+            {
+                "url": "http://blog.crossedstreams.com",
+                "label": "My Blog"
+            },
+            {
+                "url": "http://crossedstreams.com",
+                "label": "My Domain"
+            },
+            {
+                "url": "http://twitter.com/brabster",
+                "label": "My Twitter Profile",
+                "expect": {
+                    "status_code": 301
+                }
+            }
+        ]
+    },
+    {
+        "label": "Google",
+        "expect": {
+            "faster_than_millis": 2000,
+            "status_code": 200
+        },
+        "urls": [
+            {
+                "url": "http://google.com",
+                "label": "Google Homepage"
+            },
+            {
+                "url": "http://nosuchdomain.none",
+                "label": "NoSuchDomain.none"
+            },
+            {
+                "url": "http://blog.crossedstreams.com/nopagehere",
+                "label": "No Page Here"
+            }
+        ]
+    }
+]
