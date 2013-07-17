@@ -2,13 +2,19 @@
     {
         "label": "My Stuff",
         "expect": {
-            "faster_than_millis": 2000,
-            "status_code": 200
+            "faster_than_millis": 2000
         },
         "urls": [
             {
                 "url": "http://blog.crossedstreams.com",
                 "label": "My Blog"
+            },
+            {
+                "url": "https://msc.crossedstreams.com",
+                "label": "My Website",
+                "expect": {
+                    "allow_certificate_errors": true
+                }
             },
             {
                 "url": "http://crossedstreams.com",
@@ -26,8 +32,7 @@
     {
         "label": "Google",
         "expect": {
-            "faster_than_millis": 2000,
-            "status_code": 200
+            "faster_than_millis": 2000
         },
         "urls": [
             {

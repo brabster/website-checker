@@ -37,32 +37,35 @@ public class JsonParser {
     
     private UrlGroup buildGroup(JsonNode groupJson) {
         String label = groupJson.path("label").asText();
-        UrlExpectation expectation = buildExpectation(groupJson.path("expect"));
+        UrlExpectation expectation = buildExpectation(groupJson.path("expect"), UrlExpectation.DEFAULT_EXPECTATION);
         JsonNode urls = groupJson.path("urls");
         List<UrlDefinition> defs = new ArrayList<UrlDefinition>(urls.size());
         for (JsonNode urlNode:urls) {
-            defs.add(buildUrlDef(urlNode));
+            defs.add(buildUrlDef(urlNode, expectation));
         }
         return new UrlGroup(label, expectation, defs);
     }
     
-    private UrlDefinition buildUrlDef(JsonNode urlJson) {
+    private UrlDefinition buildUrlDef(JsonNode urlJson, UrlExpectation groupExpectation) {
         String url = urlJson.path("url").asText();
         String label = urlJson.path("label").asText();
-        UrlExpectation expectation = buildExpectation(urlJson.path("expect"));
+        UrlExpectation expectation = buildExpectation(urlJson.path("expect"), groupExpectation);
         return new UrlDefinition(URI.create(url), label, expectation);
     }
     
-    private UrlExpectation buildExpectation(JsonNode expectJson) {
-        if (expectJson.isMissingNode()) return UrlExpectation.DEFAULT_EXPECTATION;
+    private UrlExpectation buildExpectation(JsonNode expectJson, UrlExpectation parent) {
+        if (expectJson.isMissingNode()) return parent;
         
-        long respondsInMillis = expectJson.path("faster-than-millis")
-                .asLong(UrlExpectation.DEFAULT_EXPECTATION.getResponseInMillis());
+        long respondsInMillis = expectJson.path("faster_than_millis")
+                .asLong(parent.getResponseInMillis());
         
         int statusCode = expectJson.path("status_code")
-                .asInt(UrlExpectation.DEFAULT_EXPECTATION.getResponseHttpCode());
+                .asInt(parent.getResponseHttpCode());
         
-        return new UrlExpectation(respondsInMillis, statusCode);
+        boolean acceptUntrusted = expectJson.path("allow_certificate_errors")
+                .asBoolean(parent.allowCertificateErrors());
+        
+        return new UrlExpectation(respondsInMillis, statusCode, acceptUntrusted);
     }
         
 }

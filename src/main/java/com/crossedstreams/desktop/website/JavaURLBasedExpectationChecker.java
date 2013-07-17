@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import javax.net.ssl.SSLProtocolException;
 
 /**
  *
@@ -13,13 +14,14 @@ public class JavaURLBasedExpectationChecker implements ExpectationChecker {
 
     public void check(UrlDefinition urlDefinition, Callback callback) {
         HttpURLConnection connection = null;
+        UrlExpectation expect = urlDefinition.getExpectation();
+        long start = System.currentTimeMillis();;
         try {
+            start = System.currentTimeMillis();
             URL url = urlDefinition.getUrl().toURL();
-            UrlExpectation expect = urlDefinition.getExpectation();
             connection = HttpURLConnection.class.cast(url.openConnection());
             connection.setRequestMethod("GET");
             connection.setConnectTimeout((int)expect.getResponseInMillis());
-            long start = System.currentTimeMillis();
             connection.connect();
             long elapsed = System.currentTimeMillis() - start;
             if (expect.getResponseHttpCode() != connection.getResponseCode()) {
@@ -36,15 +38,37 @@ public class JavaURLBasedExpectationChecker implements ExpectationChecker {
                         urlDefinition);
                 return;
             }
-            callback.onResult(new DefaultExpectationResult(true, "status " + expect.getResponseHttpCode() + " in " + elapsed + "ms"), urlDefinition);
+            successCallback(callback, urlDefinition, elapsed);
         } catch (MalformedURLException ex) {
-            callback.onResult(new DefaultExpectationResult(false, ex.getMessage()), urlDefinition);
+            errorCallback(callback, urlDefinition, ex);
+        } catch (SSLProtocolException ex) {
+            if (expect.allowCertificateErrors()) {
+                certCallback(callback, urlDefinition, System.currentTimeMillis() - start);
+            } else {
+                errorCallback(callback, urlDefinition, ex);
+            }
         } catch (IOException ex) {
-            callback.onResult(new DefaultExpectationResult(false, ex.getMessage()), urlDefinition);
+            errorCallback(callback, urlDefinition, ex);
         } finally {
-            connection.disconnect();
+            if (connection != null) connection.disconnect();
         }
         
+    }
+    
+    private void errorCallback(Callback callback, UrlDefinition def, Throwable ex) {
+        callback.onResult(new DefaultExpectationResult(false, ex.getClass().getSimpleName() + " " + ex.getMessage()), def);
+    }
+    
+    private void errorCallback(Callback callback, UrlDefinition def, String message) {
+        callback.onResult(new DefaultExpectationResult(false, message), def);
+    }
+    
+    private void certCallback(Callback callback, UrlDefinition def, long elapsed) {
+        callback.onResult(new DefaultExpectationResult(true, "certificate error in " + elapsed + "ms"), def);
+    }
+    
+    private void successCallback(Callback callback, UrlDefinition def, long elapsed) {
+        callback.onResult(new DefaultExpectationResult(true, "status " + def.getExpectation().getResponseHttpCode() + " in " + elapsed + "ms"), def);
     }
     
 }
