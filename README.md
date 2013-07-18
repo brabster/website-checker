@@ -41,6 +41,20 @@ URL must present a certificate valid for at least the next 7 days.
 ]
 ```
 
+Running a jar-with-dependencies produces output such as:
+
+```
+Starting Check
+OK  My Blog (http://blog.crossedstreams.com) status 200 in 280ms
+OK  My Domain (http://crossedstreams.com) status 200 in 272ms
+OK  My Twitter Profile (http://twitter.com/brabster) status 301 in 206ms
+OK  Google Homepage (http://google.com) status 200 in 31ms
+ERR Secure Google Homepage (https://google.com) SSLException java.lang.RuntimeException: Certificate not valid for 365 days
+ERR NoSuchDomain.none (http://nosuchdomain.none) UnknownHostException nosuchdomain.none
+ERR No Page Here (http://blog.crossedstreams.com/nopagehere) expected HTTP 200 but received 404
+Check Complete
+```
+
 
 license
 =======
