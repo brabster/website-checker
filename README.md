@@ -6,6 +6,8 @@ A means of building an executable JAR file is provided, and an API provides acce
 or scripted execution.
 Implemented in pure Java, the application should run anywhere there is a Java Virtual Machine > 1.5.
 
+Any thoughts, suggestions or contributions gratefully received.
+
 features
 ========
 For all URLs:
