@@ -3,6 +3,37 @@ website-checker
 
 Checks whether websites of interest meet expectations around availability, performance and security.
 
+quick-start
+===========
+
+Define your website URLs and expectations using JSON and then run the checker programmatically
+or as an executable JAR using the Maven assembly:single goal.
+
+URL and expectation definitions look like the following, with working examples in the project.
+
+```
+[
+   {
+     "label": "Google",
+     "expect": {
+         "faster_than_millis": 2000
+     },
+     "urls": [
+         {
+             "url": "http://google.com",
+             "label": "Google Homepage"
+         },
+         {
+             "url": "https://www.google.co.uk/webhp",
+             "label": "Secure Google Homepage",
+             "expect": {
+                 "certificate_valid_for_days": 365
+             }
+         }
+      ]
+   }
+]
+```
 
 
 license
