@@ -9,7 +9,9 @@ quick-start
 Define your website URLs and expectations using JSON and then run the checker programmatically
 or as an executable JAR using the Maven assembly:single goal.
 
-URL and expectation definitions look like the following, with working examples in the project.
+URL and expectation definitions look like the following,
+which checks that the plain-text Google search page returns an HTTP 200 response in less than 2000ms,
+and that the SSL-encrypted version additionally has a valid certificate for at least the next 365 days.
 
 ```
 [
