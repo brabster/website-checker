@@ -2,6 +2,23 @@ website-checker
 ===============
 
 Checks whether websites of interest meet expectations around availability, performance and security.
+A means of building an executable JAR file is provided, and an API provides access for programmatic
+or scripted execution.
+Implemented in pure Java, the application should run anywhere there is a Java Virtual Machine > 1.5.
+
+features
+========
+For all URLs:
+- checks status code is as expected
+- checks response is received in less than a given number of milliseconds
+ 
+
+Where an https protocol is specified and a certificate is presented:
+- checks certificate is valid
+- checks certificate is trusted by the computer running the check
+- checks certificate is valid for at least a specified number of days
+
+From a security perspective, the response content is not evaluated and the app has no access to your web browser.
 
 quick-start
 ===========
