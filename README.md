@@ -44,6 +44,7 @@ URL must present a certificate valid for at least the next 7 days.
 Running a jar-with-dependencies produces output such as:
 
 ```
+[paul@paul-laptop java-website-check]$ java -jar target/java-website-check-1.0-SNAPSHOT-jar-with-dependencies.jar urls.json
 Starting Check
 OK  My Blog (http://blog.crossedstreams.com) status 200 in 280ms
 OK  My Domain (http://crossedstreams.com) status 200 in 272ms
