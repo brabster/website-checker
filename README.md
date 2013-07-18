@@ -9,16 +9,20 @@ quick-start
 Define your website URLs and expectations using JSON and then run the checker programmatically
 or as an executable JAR using the Maven assembly:single goal.
 
-URL and expectation definitions look like the following,
-which checks that the plain-text Google search page returns an HTTP 200 response in less than 2000ms,
-and that the SSL-encrypted version additionally has a valid certificate for at least the next 365 days.
+URL and expectation definitions look like the following
+We expect all URLs in the "Google" group to return an HTTP 200 response in less than 2000ms,
+and where a secure URL is specified, it must present a valid certificate.
+We further specify that the "Secure Google Homepage"
+URL must present a certificate valid for at least the next 7 days.
 
 ```
 [
    {
      "label": "Google",
      "expect": {
-         "faster_than_millis": 2000
+         "faster_than_millis": 2000,
+         "status_code": 200,
+         "accept_untrusted_certificates": false
      },
      "urls": [
          {
@@ -29,7 +33,7 @@ and that the SSL-encrypted version additionally has a valid certificate for at l
              "url": "https://www.google.co.uk/webhp",
              "label": "Secure Google Homepage",
              "expect": {
-                 "certificate_valid_for_days": 365
+                 "certificate_valid_for_days": 7
              }
          }
       ]
