@@ -3,6 +3,7 @@ package com.crossedstreams.desktop.website;
 import com.crossedstreams.desktop.website.ExpectationChecker.Callback;
 import com.crossedstreams.desktop.website.ExpectationChecker.ExpectationResult;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.Collection;
@@ -41,7 +42,9 @@ public class WebsiteCheck {
         };
 
         String jsonLocation = (args.length > 0) ? args[0] : "./urls.json";
-        Reader reader = new InputStreamReader(WebsiteCheck.class.getClassLoader().getResourceAsStream(jsonLocation), "utf-8");
+        InputStream is = WebsiteCheck.class.getClassLoader().getResourceAsStream(jsonLocation);
+        if (is == null) throw new RuntimeException("Unable to load URL data from " + jsonLocation);
+        Reader reader = new InputStreamReader(is, "utf-8");
         System.out.println("Starting Check");
         new WebsiteCheck(new JsonParser().parseUrlGroups(reader), new JavaURLBasedExpectationChecker()).check(callback);
         System.out.println("Check Complete");

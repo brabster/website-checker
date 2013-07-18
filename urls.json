@@ -2,9 +2,7 @@
     {
         "label": "My Stuff",
         "expect": {
-            "faster_than_millis": 2000,
-            "accept_untrusted_certificate": false,
-            "certificate_valid_for_days": 5
+            "faster_than_millis": 2000
         },
         "urls": [
             {
@@ -15,7 +13,7 @@
                 "url": "https://msc.crossedstreams.com",
                 "label": "My Website",
                 "expect": {
-                    "accept_untrusted_certificate": true
+                    "allow_certificate_errors": true
                 }
             },
             {
@@ -40,13 +38,6 @@
             {
                 "url": "http://google.com",
                 "label": "Google Homepage"
-            },
-            {
-                "url": "https://google.com",
-                "label": "Secure Google Homepage",
-                "expect": {
-                    "certificate_valid_for_days": 365
-                }
             },
             {
                 "url": "http://nosuchdomain.none",

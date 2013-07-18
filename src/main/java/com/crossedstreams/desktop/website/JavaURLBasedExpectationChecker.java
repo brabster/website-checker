@@ -1,9 +1,19 @@
 package com.crossedstreams.desktop.website;
 
+import com.crossedstreams.desktop.website.ssl.PermissiveCertificateExposingTrustManager;
+import com.crossedstreams.desktop.website.ssl.SSLContextInitialiser;
+import com.crossedstreams.desktop.website.ssl.X509CertificateListener;
+import com.crossedstreams.desktop.website.ssl.X509PathValidator;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.cert.CertificateExpiredException;
+import java.security.cert.CertificateNotYetValidException;
+import java.security.cert.X509Certificate;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.TimeZone;
 import javax.net.ssl.SSLProtocolException;
 
 /**
@@ -11,30 +21,73 @@ import javax.net.ssl.SSLProtocolException;
  * @author Paul Brabban <paul dot brabban at gmail dot com>
  */
 public class JavaURLBasedExpectationChecker implements ExpectationChecker {
-
+    
+    private UrlExpectation currentExpectation = null;
+    
+    private X509CertificateListener certListener = new X509CertificateListener() {
+        
+        private X509PathValidator pathValidator = new X509PathValidator();
+        
+        public void onCertificatePresentation(X509Certificate[] certs) {
+            if (currentExpectation.acceptUntrustedCertificate() || !certificationPathIsTrusted(certs)) {
+                throw new RuntimeException("Untrusted certificate");
+            }
+            
+            Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+            cal.add(Calendar.DATE, currentExpectation.getCertificateValidForDays());
+            
+            if (!timeConstraintsMeetExpectation(cal.getTime(), certs)) {
+                throw new RuntimeException("Certificate not valid for " + currentExpectation.getCertificateValidForDays() + " days");
+            }
+        }
+        
+        private boolean timeConstraintsMeetExpectation(Date validUntil, X509Certificate... certs) {
+            for (X509Certificate cert:certs) {
+                try {
+                    cert.checkValidity();
+                    cert.checkValidity(validUntil);
+                } catch (CertificateExpiredException ex) {
+                    return false;
+                } catch (CertificateNotYetValidException ex) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        
+        private boolean certificationPathIsTrusted(X509Certificate... certs) {
+            boolean isValid = pathValidator.isValid(certs);
+            return isValid;
+        }
+    };
+    
+    {
+        SSLContextInitialiser.initSslContext(new PermissiveCertificateExposingTrustManager(certListener));
+    }
+    
     public void check(UrlDefinition urlDefinition, Callback callback) {
         HttpURLConnection connection = null;
-        UrlExpectation expect = urlDefinition.getExpectation();
-        long start = System.currentTimeMillis();;
+        this.currentExpectation = urlDefinition.getExpectation();
+        long start = -1;
         try {
             start = System.currentTimeMillis();
             URL url = urlDefinition.getUrl().toURL();
             connection = HttpURLConnection.class.cast(url.openConnection());
             connection.setRequestMethod("GET");
-            connection.setConnectTimeout((int)expect.getResponseInMillis());
+            connection.setConnectTimeout((int)currentExpectation.getResponseInMillis());
             connection.connect();
             long elapsed = System.currentTimeMillis() - start;
-            if (expect.getResponseHttpCode() != connection.getResponseCode()) {
+            if (currentExpectation.getResponseHttpCode() != connection.getResponseCode()) {
                 callback.onResult(new DefaultExpectationResult(false,
-                        "expected HTTP " + expect.getResponseHttpCode() + 
+                        "expected HTTP " + currentExpectation.getResponseHttpCode() + 
                         " but received " + connection.getResponseCode()),
                         urlDefinition);
                 return;
             }
-            if (elapsed > expect.getResponseInMillis()) {
+            if (elapsed > currentExpectation.getResponseInMillis()) {
                 callback.onResult(new DefaultExpectationResult(false,
                         "took " + elapsed + 
-                        "ms, allowed " + expect.getResponseInMillis() + "ms"),
+                        "ms, allowed " + currentExpectation.getResponseInMillis() + "ms"),
                         urlDefinition);
                 return;
             }
@@ -42,11 +95,7 @@ public class JavaURLBasedExpectationChecker implements ExpectationChecker {
         } catch (MalformedURLException ex) {
             errorCallback(callback, urlDefinition, ex);
         } catch (SSLProtocolException ex) {
-            if (expect.allowCertificateErrors()) {
-                certCallback(callback, urlDefinition, System.currentTimeMillis() - start);
-            } else {
-                errorCallback(callback, urlDefinition, ex);
-            }
+            if (!currentExpectation.acceptUntrustedCertificate()) errorCallback(callback, urlDefinition, ex);
         } catch (IOException ex) {
             errorCallback(callback, urlDefinition, ex);
         } finally {

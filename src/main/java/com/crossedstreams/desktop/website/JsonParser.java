@@ -62,10 +62,14 @@ public class JsonParser {
         int statusCode = expectJson.path("status_code")
                 .asInt(parent.getResponseHttpCode());
         
-        boolean acceptUntrusted = expectJson.path("allow_certificate_errors")
-                .asBoolean(parent.allowCertificateErrors());
+        boolean acceptUntrusted = expectJson.path("accept_untrusted_certificate")
+                .asBoolean(parent.acceptUntrustedCertificate());
         
-        return new UrlExpectation(respondsInMillis, statusCode, acceptUntrusted);
+        int validForDays = expectJson.path("certificate_valid_for_days")
+                .asInt(parent.getCertificateValidForDays());
+        
+        
+        return new UrlExpectation(respondsInMillis, statusCode, acceptUntrusted, validForDays);
     }
         
 }

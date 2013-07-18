@@ -12,16 +12,19 @@ public class UrlExpectation {
     public static UrlExpectation DEFAULT_EXPECTATION = new UrlExpectation(
             TimeUnit.MILLISECONDS.convert(5, TimeUnit.SECONDS),
             HttpURLConnection.HTTP_OK,
-            false);
+            false,
+            7);
 
     private final long responseInMillis;
     private final int responseHttpCode;
-    private final boolean allowCertificateErrors;
+    private final boolean acceptUntrustedCertificate;
+    private final int certificateValidForDays;
 
-    public UrlExpectation(long responseInMillis, int responseHttpCode, boolean allowCertificateErrors) {
+    public UrlExpectation(long responseInMillis, int responseHttpCode, boolean acceptUntrustedCertificate, int certificateValidForDays) {
         this.responseInMillis = responseInMillis;
         this.responseHttpCode = responseHttpCode;
-        this.allowCertificateErrors = allowCertificateErrors;
+        this.acceptUntrustedCertificate = acceptUntrustedCertificate;
+        this.certificateValidForDays = certificateValidForDays;
     }
 
     public long getResponseInMillis() {
@@ -32,16 +35,21 @@ public class UrlExpectation {
         return responseHttpCode;
     }
 
-    public boolean allowCertificateErrors() {
-        return allowCertificateErrors;
+    public boolean acceptUntrustedCertificate() {
+        return acceptUntrustedCertificate;
+    }
+
+    public int getCertificateValidForDays() {
+        return certificateValidForDays;
     }
 
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = 97 * hash + (int) (this.responseInMillis ^ (this.responseInMillis >>> 32));
-        hash = 97 * hash + this.responseHttpCode;
-        hash = 97 * hash + (this.allowCertificateErrors ? 1 : 0);
+        hash = 67 * hash + (int) (this.responseInMillis ^ (this.responseInMillis >>> 32));
+        hash = 67 * hash + this.responseHttpCode;
+        hash = 67 * hash + (this.acceptUntrustedCertificate ? 1 : 0);
+        hash = 67 * hash + this.certificateValidForDays;
         return hash;
     }
 
@@ -60,7 +68,10 @@ public class UrlExpectation {
         if (this.responseHttpCode != other.responseHttpCode) {
             return false;
         }
-        if (this.allowCertificateErrors != other.allowCertificateErrors) {
+        if (this.acceptUntrustedCertificate != other.acceptUntrustedCertificate) {
+            return false;
+        }
+        if (this.certificateValidForDays != other.certificateValidForDays) {
             return false;
         }
         return true;
@@ -68,7 +79,7 @@ public class UrlExpectation {
 
     @Override
     public String toString() {
-        return "UrlExpectation{" + "responseInMillis=" + responseInMillis + ", responseHttpCode=" + responseHttpCode + ", allowCertificateErrors=" + allowCertificateErrors + '}';
+        return "UrlExpectation{" + "responseInMillis=" + responseInMillis + ", responseHttpCode=" + responseHttpCode + ", acceptUntrustedCertificate=" + acceptUntrustedCertificate + ", certificateValidForDays=" + certificateValidForDays + '}';
     }
-    
+
 }
