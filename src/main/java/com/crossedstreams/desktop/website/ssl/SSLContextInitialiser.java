@@ -3,6 +3,7 @@ package com.crossedstreams.desktop.website.ssl;
 import java.security.KeyStore;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
@@ -17,7 +18,7 @@ public class SSLContextInitialiser {
     
     private static X509TrustManager DEFAULT_TRUST_MANAGER = null;
     
-    public static void initSslContext(TrustManager... managers) {
+    public static SSLSocketFactory getSSLSocketFactoryWithTrustManagers(TrustManager... managers) {
         try {
             KeyStore store = KeyStore.getInstance(KeyStore.getDefaultType());
             if (DEFAULT_TRUST_MANAGER == null) {
@@ -27,10 +28,10 @@ public class SSLContextInitialiser {
             }
             SSLContext ctx = SSLContext.getInstance(SSL_ALGORITHM);
             ctx.init(null, managers, null);
-            HttpsURLConnection.setDefaultSSLSocketFactory(ctx.getSocketFactory());
+            return ctx.getSocketFactory();
         } catch (Exception e) {
             throw new RuntimeException("Unable to initialise SSL context", e);
-        }    
+        }
     }
     
     public static X509TrustManager getDefaultTrustManager() {

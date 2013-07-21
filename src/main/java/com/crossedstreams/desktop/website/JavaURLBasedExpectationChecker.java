@@ -1,7 +1,5 @@
 package com.crossedstreams.desktop.website;
 
-import com.crossedstreams.desktop.website.ssl.PermissiveCertificateExposingTrustManager;
-import com.crossedstreams.desktop.website.ssl.SSLContextInitialiser;
 import com.crossedstreams.desktop.website.ssl.X509CertificateListener;
 import com.crossedstreams.desktop.website.ssl.X509PathValidator;
 import java.io.IOException;
@@ -23,6 +21,7 @@ import javax.net.ssl.SSLProtocolException;
 public class JavaURLBasedExpectationChecker implements ExpectationChecker {
     
     private UrlExpectation currentExpectation = null;
+    private UrlConnectionFactory urls = new UrlConnectionFactory();
     
     private X509CertificateListener certListener = new X509CertificateListener() {
         
@@ -61,10 +60,6 @@ public class JavaURLBasedExpectationChecker implements ExpectationChecker {
         }
     };
     
-    {
-        SSLContextInitialiser.initSslContext(new PermissiveCertificateExposingTrustManager(certListener));
-    }
-    
     public void check(UrlDefinition urlDefinition, Callback callback) {
         HttpURLConnection connection = null;
         this.currentExpectation = urlDefinition.getExpectation();
@@ -72,7 +67,9 @@ public class JavaURLBasedExpectationChecker implements ExpectationChecker {
         try {
             start = System.currentTimeMillis();
             URL url = urlDefinition.getUrl().toURL();
-            connection = HttpURLConnection.class.cast(url.openConnection());
+            
+            connection = (urls.requiresHttps(url)) ? urls.getHttpsUrlConnection(url) : urls.getHttpUrlConnection(url);
+            
             connection.setRequestMethod("GET");
             connection.setConnectTimeout((int)currentExpectation.getResponseInMillis());
             connection.connect();
