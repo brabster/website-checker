@@ -5,8 +5,10 @@ import com.crossedstreams.desktop.website.ExpectationChecker.ExpectationResult;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PrintStream;
 import java.io.Reader;
 import java.util.Collection;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  *
@@ -14,8 +16,9 @@ import java.util.Collection;
  */
 public class WebsiteCheck {
 
-    private Collection<UrlGroup> groups;
-    private ExpectationChecker checker;
+    private final Collection<UrlGroup> groups;
+    private final ExpectationChecker checker;
+    
 
     public WebsiteCheck(Collection<UrlGroup> groups, ExpectationChecker checker) {
         this.groups = groups;
@@ -31,23 +34,41 @@ public class WebsiteCheck {
     }
 
     public static void main(String[] args) throws IOException {
+        final PrintStream okStream = System.out;
+        final PrintStream errStream = System.err;
+        final int okCode = 0;
+        final int argErrCode = 1;
+        final int expectErrCode = 2;
+        
+        final AtomicInteger resultCode = new AtomicInteger(okCode);
+                
         final Callback callback = new Callback() {
             public void onResult(ExpectationResult result, UrlDefinition def) {
-                System.out.println(String.format("%s %s (%s) %s",
+                String resultExplanation = String.format("%s %s (%s) %s",
                         (result.isMet()) ? "OK " : "ERR",
                         def.getLabel(),
                         def.getUrl(),
-                        result.getExplanation()));
+                        result.getExplanation());
+                if (result.isMet()) {
+                    okStream.println(resultExplanation);
+                } else {
+                    errStream.println(resultExplanation);
+                    resultCode.set(expectErrCode);
+                }
             }
         };
 
         String jsonLocation = (args.length > 0) ? args[0] : "./urls.json";
         InputStream is = WebsiteCheck.class.getClassLoader().getResourceAsStream(jsonLocation);
-        if (is == null) throw new RuntimeException("Unable to load URL data from " + jsonLocation);
+        if (is == null) {
+            errStream.println("Unable to load URL data from " + jsonLocation);
+            System.exit(argErrCode);
+        }
         Reader reader = new InputStreamReader(is, "utf-8");
         System.out.println("Starting Check");
         new WebsiteCheck(new JsonParser().parseUrlGroups(reader), new JavaURLBasedExpectationChecker()).check(callback);
         System.out.println("Check Complete");
+        System.exit(resultCode.get());
     }
 
     public Collection<UrlGroup> getGroups() {
