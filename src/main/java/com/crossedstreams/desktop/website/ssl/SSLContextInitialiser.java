@@ -1,7 +1,6 @@
 package com.crossedstreams.desktop.website.ssl;
 
 import java.security.KeyStore;
-import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
