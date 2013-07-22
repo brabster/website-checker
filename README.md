@@ -8,6 +8,11 @@ Implemented in pure Java, the application should run anywhere there is a Java Vi
 
 Any thoughts, suggestions or contributions gratefully received.
 
+issues
+======
+
+Raise issues at https://github.com/brabster/website-checker/issues?milestone=1&state=open
+
 features
 ========
 For all URLs:
