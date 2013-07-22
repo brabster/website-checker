@@ -4,7 +4,7 @@
 
     <groupId>com.crossedstreams.desktop</groupId>
     <artifactId>java-website-check</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0</version>
     <packaging>jar</packaging>
 
     <name>java-website-check</name>
